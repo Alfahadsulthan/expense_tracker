@@ -1,4 +1,3 @@
-
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/models/expense_category.dart';
 import 'package:expense_tracker/screens/categories.dart';
@@ -15,6 +14,45 @@ class MonthGroupScreen extends StatelessWidget {
   const MonthGroupScreen({super.key, required this.monthKey});
   final String monthKey;
 
+  // 🔹 Helper widget for each menu button
+  Widget _buildMenuButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: Row(
+        // mainAxisSize: MainAxisSize.min,
+        children: [
+          InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(icon, size: 28, color: Colors.black),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final monthExpenseCategoryListBox =
@@ -23,25 +61,60 @@ class MonthGroupScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('Expense Categories by Month'),
         actions: [
           IconButton(
-            tooltip: 'Add Category',
-            icon: const Icon(Icons.add_box_outlined),
-            onPressed: () => showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => const AddCategorySheet(),
-            ),
-          ),
-          IconButton(
-            tooltip: 'Settings',
-            icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const CategoriesScreen()),
-            ),
+            icon: const Icon(Icons.category),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                ),
+                builder: (_) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      // alignment: WrapAlignment.center,
+                      spacing: 24,
+                      // runSpacing: 16,
+                      children: [
+                        /// Category List Option
+                        _buildMenuButton(
+                          icon: Icons.category,
+                          label: "Category List",
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (_) => const CategoriesScreen()),
+                            );
+                          },
+                        ),
+
+                        /// Category List Option
+                        _buildMenuButton(
+                          icon: Icons.add_outlined,
+                          label: "Add New Category",
+                          onTap: () {
+                            Navigator.pop(context);
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => const AddCategorySheet(),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
@@ -218,12 +291,11 @@ class MonthGroupExpensePieChartWidget extends StatelessWidget {
               const SizedBox(height: 16),
 
               // 🔹 Pie chart of categories
-             
+
               Expanded(
                 child: PieChart(
                   PieChartData(
                     sections: groupExpenseCategoryList.map((gec) {
-                      
                       double categoryTotal = 0;
 
                       for (Expense ct in expenseList) {
@@ -286,7 +358,5 @@ class MonthGroupExpensePieChartWidget extends StatelessWidget {
         ),
       ),
     );
-
-   
   }
 }
