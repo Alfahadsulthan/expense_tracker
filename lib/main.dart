@@ -61,7 +61,7 @@ class ExpenseGuardApp extends StatelessWidget {
       title: 'Expense Guard',
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.teal,
+        colorSchemeSeed: Colors.deepPurpleAccent,
       ),
       home: const MonthScreen(),
     );

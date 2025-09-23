@@ -1,6 +1,7 @@
 import 'package:expense_tracker/models/category.dart';
 import 'package:expense_tracker/screens/expense_bar_chart.dart';
 import 'package:expense_tracker/screens/expense_pie_chart.dart';
+import 'package:expense_tracker/widgets/fade_fab_button.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -185,10 +186,10 @@ class _MonthExpensesScreenState extends State<MonthExpensesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.catrgoryName),
         actions: [
-        
-
+          /// More Options
           IconButton(
             icon: const Icon(Icons.more_vert),
             onPressed: () {
@@ -460,89 +461,154 @@ class _MonthExpensesScreenState extends State<MonthExpensesScreen> {
               categoryName: 'Total', total: grand, colorHex: 0xFF000000));
 
           if (filteredAndSorted.isEmpty) {
-            return  Center(child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text("No expenses match your filter"),
-                // 🔹 Add button + TotalsBar
-              FloatingActionButton.extended(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => AddExpenseSheet(
-                      expenseCategory: widget.catrgoryName,
-                      monthKey: widget.monthKey,
-                    ),
-                  );
-                },
-                label: const Text('Add'),
-                icon: const Icon(Icons.add),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text(
+                    "No expenses match your filter",
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+                  FloatingActionButton.extended(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => AddExpenseSheet(
+                          expenseCategory: widget.catrgoryName,
+                          monthKey: widget.monthKey,
+                        ),
+                      );
+                    },
+                    label: const Text('Add Expense'),
+                    icon: const Icon(Icons.add),
+                    backgroundColor: Colors.teal,
+                  ),
+                ],
               ),
-              const SizedBox(height: 10),
-              ],
-            ));
+            );
           }
 
           return Column(
             children: [
               Expanded(
-                child: ListView.separated(
-                  itemCount: filteredAndSorted.length,
-                  separatorBuilder: (_, __) => const Divider(height: 0),
-                  itemBuilder: (context, index) {
-                    final ex = filteredAndSorted[index];
-                    return ListTile(
-                      title: Text(
-                        ex.name,
-                        style: TextStyle(
-                          color: Color(ex.categoryColor),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Row(
-                        children: [
-                          Text(
-                            ex.categoryName,
-                            style: TextStyle(
-                              color: Color(ex.categoryColor),
-                              fontWeight: FontWeight.w600,
+                child: Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    ListView.builder(
+                      padding: const EdgeInsets.fromLTRB(8, 12, 8, 100),
+                      itemCount: filteredAndSorted.length,
+                      itemBuilder: (context, index) {
+                        final ex = filteredAndSorted[index];
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
+                          elevation: 2,
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 6, horizontal: 8),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 10, horizontal: 16),
+                            leading: CircleAvatar(
+                              backgroundColor: Color(ex.categoryColor),
+                              child: Text(
+                                ex.name[0].toUpperCase(),
+                                style: const TextStyle(color: Colors.white),
+                              ),
                             ),
+                            title: Text(
+                              ex.name,
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey[800]),
+                            ),
+                            subtitle: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Color(ex.categoryColor)
+                                            .withOpacity(0.2),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(
+                                        ex.categoryName,
+                                        style: TextStyle(
+                                            color: Color(ex.categoryColor),
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      DateFormat('dd MMM, hh:mm a')
+                                          .format(ex.date),
+                                      style: TextStyle(
+                                          color: Colors.grey[600],
+                                          fontSize: 12),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            trailing: Text(
+                              '₹${ex.amount.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Color(ex.categoryColor)),
+                            ),
+                            onLongPress: () async => await ex.delete(),
                           ),
-                          const SizedBox(width: 5),
-                          Text(DateFormat('dd MMM, hh:mm a').format(ex.date)),
-                        ],
-                      ),
-                      trailing: Text(
-                        '₹${ex.amount.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          color: Color(ex.categoryColor),
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      onLongPress: () async => await ex.delete(),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: FadingFab(
+                          onPressed: () {
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              builder: (_) => AddExpenseSheet(
+                                expenseCategory: widget.catrgoryName,
+                                monthKey: widget.monthKey,
+                              ),
+                            );
+                          },
+                          label: const Text('Add'),
+                          icon: const Icon(Icons.add),
+                        )),
+                  ],
                 ),
               ),
 
-              // 🔹 Add button + TotalsBar
-              FloatingActionButton.extended(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (_) => AddExpenseSheet(
-                      expenseCategory: widget.catrgoryName,
-                      monthKey: widget.monthKey,
-                    ),
-                  );
-                },
-                label: const Text('Add'),
-                icon: const Icon(Icons.add),
+              // 🔹 Sticky totals + Add button
+              Container(
+                padding: const EdgeInsets.all(0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade300,
+                      offset: const Offset(0, -2),
+                      blurRadius: 6,
+                    )
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _TotalsBar(categoryTotals: categoryTotalList),
+                  ],
+                ),
               ),
-              const SizedBox(height: 10),
-              _TotalsBar(categoryTotals: categoryTotalList),
             ],
           );
         },

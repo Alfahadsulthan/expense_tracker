@@ -18,7 +18,7 @@ class ExpensePieChartScreen extends StatelessWidget {
         filteredTotals.fold(0, (sum, ct) => sum + ct.total);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Expense Chart")),
+      appBar: AppBar( backgroundColor: Theme.of(context).colorScheme.inversePrimary,title: const Text("Expense Chart")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

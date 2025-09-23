@@ -127,7 +127,7 @@ class ExpenseStackedBarChartScreen extends StatelessWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Daily Expenses by Category")),
+      appBar: AppBar( backgroundColor: Theme.of(context).colorScheme.inversePrimary,title: const Text("Daily Expenses by Category")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
