@@ -19,7 +19,7 @@ class MonthScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Months Overview'),
         elevation: 0,
-        backgroundColor: Colors.teal,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         actions: [
           IconButton(
             tooltip: 'Add current month',
@@ -39,73 +39,73 @@ class MonthScreen extends StatelessWidget {
         ],
       ),
       body: ValueListenableBuilder(
-        valueListenable: expenseList.listenable(),
-        builder: (context, expenseListValue, child) {
-          return ValueListenableBuilder(
-            valueListenable: monthsBox.listenable(),
-            builder: (context, Box<String> box, _) {
-              final months = box.values.toList();
-              months.sort((a, b) => b.compareTo(a)); // newest first
-          
-              if (months.isEmpty) {
-                return const Center(child: Text('No months yet'));
-              }
-          
-              return ListView(
-                padding: const EdgeInsets.all(12),
-                children: [
-                  
-          
-                  // 🔹 Month List with Cards
-                  ...months.map((key) {
-                     List<Expense> expenseList =
-                         expenseListValue
-                              .values
-                              .map((e) => e)
-                              .toList();
+          valueListenable: expenseList.listenable(),
+          builder: (context, expenseListValue, child) {
+            return ValueListenableBuilder(
+              valueListenable: monthsBox.listenable(),
+              builder: (context, Box<String> box, _) {
+                final months = box.values.toList();
+                months.sort((a, b) => b.compareTo(a)); // newest first
+
+                if (months.isEmpty) {
+                  return const Center(child: Text('No months yet'));
+                }
+
+                return ListView(
+                  padding: const EdgeInsets.all(12),
+                  children: [
+                    // 🔹 Month List with Cards
+                    ...months.map((key) {
+                      List<Expense> expenseList =
+                          expenseListValue.values.map((e) => e).toList();
                       double categoryTotal = 0;
 
                       for (Expense ct in expenseList) {
-                        if (ct.monthKey == key ) {
+                        if (ct.monthKey == key) {
                           categoryTotal += ct.amount;
                         }
                       }
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16)),
-                      elevation: 2,
-                      child: ListTile(
-                        contentPadding:
-                            const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                        title: Text(
-                          monthLabelFromKey(key),
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.w600),
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          title: Text(
+                            monthLabelFromKey(key),
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.w600),
+                          ),
+                          subtitle: Text(
+                              "Total: ₹ ${categoryTotal.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.teal[700],
+                              )), 
+                          trailing:
+                              const Icon(Icons.arrow_forward_ios, size: 18),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MonthGroupScreen(monthKey: key),
+                              ),
+                            );
+                          },
                         ),
-                        subtitle:  Text("Total: ₹ ${categoryTotal.toStringAsFixed(2)}"), // TODO: fetch from DB
-                        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => MonthGroupScreen(monthKey: key),
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  }),
-                ],
-              );
-            },
-          );
-        }
-      ),
+                      );
+                    }),
+                  ],
+                );
+              },
+            );
+          }),
     );
   }
 }
-
 
 // class MonthScreen extends StatelessWidget {
 //   const MonthScreen({super.key});
