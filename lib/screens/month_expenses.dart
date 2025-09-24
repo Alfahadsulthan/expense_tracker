@@ -186,7 +186,7 @@ class _MonthExpensesScreenState extends State<MonthExpensesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.catrgoryName),
         actions: [
           /// More Options
@@ -564,7 +564,35 @@ class _MonthExpensesScreenState extends State<MonthExpensesScreen> {
                                   fontSize: 16,
                                   color: Color(ex.categoryColor)),
                             ),
-                            onLongPress: () async => await ex.delete(),
+                            onLongPress: () async => showDialog(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text("Conformation!"),
+                                content:
+                                     Text("Are you sure to delete this? ${ex.name}"),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(ctx).pop();
+                                      await ex.delete();
+                                    },
+                                    child: const Text(
+                                      "Cancle",
+                                    ),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(ctx).pop();
+                                      await ex.delete();
+                                    },
+                                    child: const Text(
+                                      "Delete",
+                                      style: TextStyle(color: Colors.red),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       },

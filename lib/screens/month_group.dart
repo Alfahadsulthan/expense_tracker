@@ -139,13 +139,7 @@ class MonthGroupScreen extends StatelessWidget {
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(12, 12, 12, 150),
                   children: [
-                    // 🔹 Overview Card
-                    MonthGroupExpensePieChartWidget(
-                        expenseList:
-                            exenseListBox.values.map((e) => e).toList(),
-                        groupExpenseCategoryList: months),
-
-                    const SizedBox(height: 20),
+                   
 
                     // 🔹 Category List
                     ...months.map((key) {
@@ -198,6 +192,13 @@ class MonthGroupScreen extends StatelessWidget {
                         ),
                       );
                     }),
+                    const SizedBox(height: 20),
+                     // 🔹 Overview Card
+                    MonthGroupExpensePieChartWidget(
+                        expenseList:
+                            exenseListBox.values.map((e) => e).toList(),
+                        groupExpenseCategoryList: months),
+
                   ],
                 );
               },
@@ -275,7 +276,7 @@ class MonthGroupExpensePieChartWidget extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: SizedBox(
-          height: 600,
+          height: 500,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
