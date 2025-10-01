@@ -1,5 +1,6 @@
 import 'package:expense_tracker/models/expense.dart';
 import 'package:expense_tracker/models/expense_category.dart';
+import 'package:expense_tracker/screens/month_expenses.dart';
 import 'package:expense_tracker/screens/month_group.dart';
 import 'package:expense_tracker/screens/categories.dart';
 import 'package:flutter/material.dart';
@@ -42,87 +43,145 @@ class MonthScreen extends StatelessWidget {
         ],
       ),
       body: ValueListenableBuilder(
-          valueListenable: monthExpenseCategoryListBox.listenable(),
-          builder: (context, monthGroupExpenseBox, child) {
-            return ValueListenableBuilder(
-                valueListenable: expenseList.listenable(),
-                builder: (context, expenseListValue, child) {
-                  return ValueListenableBuilder(
-                    valueListenable: monthsBox.listenable(),
-                    builder: (context, Box<String> box, _) {
-                      final months = box.values.toList();
-                      months.sort((a, b) => b.compareTo(a)); // newest first
+        valueListenable: monthExpenseCategoryListBox.listenable(),
+        builder: (context, monthGroupExpenseBox, child) {
+          return ValueListenableBuilder(
+            valueListenable: expenseList.listenable(),
+            builder: (context, expenseListValue, child) {
+              return ValueListenableBuilder(
+                valueListenable: monthsBox.listenable(),
+                builder: (context, Box<String> box, _) {
+                  final months = box.values.toList();
+                  months.sort((a, b) => b.compareTo(a)); // newest first
 
-                      if (months.isEmpty) {
-                        return const Center(child: Text('No months yet'));
+                  if (months.isEmpty) {
+                    return const Center(child: Text('No months yet'));
+                  }
+
+                  return ListView.builder(
+                    padding: const EdgeInsets.all(12),
+                    itemCount: months.length,
+                    itemBuilder: (context, index) {
+                      final monthKey = months[index];
+                      final monthCategories = monthGroupExpenseBox.values
+                          .where((e) => e.monthKey == monthKey)
+                          .toList();
+
+                      // sort newest first
+                      monthCategories.sort((a, b) => b.date.compareTo(a.date));
+
+                      final allExpenses =
+                          expenseListValue.values.map((e) => e).toList();
+
+                      double categoryTotal = 0;
+                      for (ExpenseCategory ec in monthCategories) {
+                        for (Expense ct in allExpenses) {
+                          if (ct.monthKey == ec.monthKey &&
+                              ct.expenseCategoryName == ec.name) {
+                            categoryTotal += ct.amount;
+                          }
+                        }
                       }
 
-                      return ListView(
-                        padding: const EdgeInsets.all(12),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 🔹 Month List with Cards
-                          ...months.map((key) {
-                            final months = monthGroupExpenseBox.values
-                                .where((e) => e.monthKey == key)
-                                .toList();
-
-                            // sort newest first
-                            months.sort((a, b) => b.date.compareTo(a.date));
-                            List<Expense> expenseList =
-                                expenseListValue.values.map((e) => e).toList();
-                            double categoryTotal = 0;
-                            for (ExpenseCategory ec in months) {
-                              for (Expense ct in expenseList) {
-                                if (ct.monthKey == ec.monthKey &&
-                                    ct.expenseCategoryName == ec.name) {
-                                  categoryTotal += ct.amount;
-                                }
-                              }
-                            }
-                            return Card(
-                              margin: const EdgeInsets.only(bottom: 12),
+                          // 🔹 Month heading card
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Card(
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16)),
-                              elevation: 2,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              color: Colors.teal[50],
+                              elevation: 1,
                               child: ListTile(
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 12, horizontal: 16),
                                 title: Text(
-                                  monthLabelFromKey(key),
+                                  monthLabelFromKey(monthKey),
                                   style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.w600),
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 subtitle: Text(
-                                    "Total: ₹ ${categoryTotal.toStringAsFixed(2)}",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.teal[700],
-                                    )),
-                                trailing: const Icon(Icons.arrow_forward_ios,
-                                    size: 18),
+                                  "Total: ₹${categoryTotal.toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.teal[800],
+                                  ),
+                                ),
+                                trailing: const Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 18,
+                                ),
                                 onTap: () {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (_) =>
-                                          MonthGroupScreen(monthKey: key),
+                                          MonthGroupScreen(monthKey: monthKey),
                                     ),
                                   );
                                 },
                               ),
-                            );
-                          }),
+                            ),
+                          ),
+
+                          // 🔹 Sub-categories / related data below each month
+                          ...monthCategories.map(
+                            (cat) => Card(
+                              margin: const EdgeInsets.only(bottom: 8, left: 12, right: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              elevation: 1,
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 8,
+                                  horizontal: 16,
+                                ),
+                                title: Text(
+                                  cat.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  "Category expenses",
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => MonthExpensesScreen(
+                                        catrgoryName: cat.name,
+                                        monthKey: monthKey,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                         ],
                       );
                     },
                   );
-                });
-          }),
+                },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
+
 
 // class MonthScreen extends StatelessWidget {
 //   const MonthScreen({super.key});
