@@ -38,7 +38,7 @@ class _AddMonthGroupSheetState extends State<AddMonthGroupSheet> {
         Hive.box<ExpenseCategory>(kBoxMonthExpenseCategoryList);
 
     for (ExpenseCategory ec in expensesCategoryListBox.values) {
-      if (ec.name.toLowerCase() == _nameCtrl.text.trim().toLowerCase()) {
+      if (ec.name.toLowerCase() == _nameCtrl.text.trim().toLowerCase() && ec.monthKey==widget.initialMonthKey) {
         showDialog(
           context: context,
           builder: (ctx) => AlertDialog(

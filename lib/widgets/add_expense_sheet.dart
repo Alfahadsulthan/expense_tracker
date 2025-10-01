@@ -11,8 +11,9 @@ import '../models/expense.dart';
 class AddExpenseSheet extends StatefulWidget {
   final String expenseCategory;
   final String monthKey;
+  final Expense? expenseToEdit;
   const AddExpenseSheet(
-      {super.key, required this.expenseCategory, required this.monthKey});
+      {super.key, required this.expenseCategory, required this.monthKey, this.expenseToEdit});
 
   @override
   State<AddExpenseSheet> createState() => _AddExpenseSheetState();
@@ -27,6 +28,18 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
 
   List<CategorySchema> categoryList =
       Hive.box<CategorySchema>(kBoxCategoryList).values.toList();
+  @override
+  void initState() {
+    _nameCtrl.text = widget.expenseToEdit?.name ?? '';
+    _amountCtrl.text = widget.expenseToEdit?.amount.toString() ?? '';
+    _date = widget.expenseToEdit?.date ?? DateTime.now();
+    if (widget.expenseToEdit != null) {
+      selectedCategory = categoryList.firstWhere(
+          (cat) => cat.name == widget.expenseToEdit!.categoryName,
+      );
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -138,6 +151,20 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
       expenseCategoryName: widget.expenseCategory,
       monthKey: monthKey,
     );
+    if(widget.expenseToEdit != null){
+      //editing existing expense
+      widget.expenseToEdit!
+        ..name = expense.name
+        ..amount = expense.amount
+        ..date = expense.date
+        ..categoryName = expense.categoryName
+        ..categoryColor = expense.categoryColor
+        ..expenseCategoryName = expense.expenseCategoryName
+        ..monthKey = expense.monthKey;
+      await widget.expenseToEdit!.save();
+      if (mounted) Navigator.pop(context);
+      return;
+    }
     await expensesBox.add(expense);
 
     if (mounted) Navigator.pop(context);

@@ -2,6 +2,7 @@ import 'package:expense_tracker/models/category.dart';
 import 'package:expense_tracker/screens/expense_bar_chart.dart';
 import 'package:expense_tracker/screens/expense_pie_chart.dart';
 import 'package:expense_tracker/widgets/fade_fab_button.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
@@ -430,7 +431,8 @@ class _MonthExpensesScreenState extends State<MonthExpensesScreen> {
         valueListenable: Hive.box<Expense>(kBoxExpenses).listenable(),
         builder: (context, Box<Expense> box, _) {
           final all = box.values
-              .where((e) => e.expenseCategoryName == widget.catrgoryName)
+              .where((e) => e.expenseCategoryName == widget.catrgoryName &&
+        e.monthKey == widget.monthKey)
               .toList();
 
           filteredAndSorted = _applyFiltersAndSorting(all);
@@ -569,25 +571,70 @@ class _MonthExpensesScreenState extends State<MonthExpensesScreen> {
                               builder: (ctx) => AlertDialog(
                                 title: const Text("Conformation!"),
                                 content:
-                                     Text("Are you sure to delete this? ${ex.name}"),
+                                     Text("Are you sure to make changes on this? ${ex.name}"),
                                 actions: [
-                                  TextButton(
+                                  IconButton(
                                     onPressed: () async {
                                       Navigator.of(ctx).pop();
-                                      await ex.delete();
                                     },
-                                    child: const Text(
-                                      "Cancle",
+                                    icon:const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                           Icon(
+                                      CupertinoIcons.xmark
+                                    ),
+                                     SizedBox(width: 2),
+                                         Text(
+                                          "Cancle",
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  TextButton(
+                                   
+                                  IconButton(
+                                    onPressed: () async {
+                                      Navigator.of(ctx).pop();
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        builder: (_) => AddExpenseSheet(
+                                          expenseCategory: ex.expenseCategoryName,
+                                          monthKey: widget.monthKey,
+                                          expenseToEdit: ex,
+                                        ),
+                                      );
+                                    },
+                                    icon:const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                         Icon(
+                                      Icons.edit
+                                    ),
+                                     SizedBox(width: 2),
+                                         Text(
+                                          "Edit",
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
                                     onPressed: () async {
                                       Navigator.of(ctx).pop();
                                       await ex.delete();
                                     },
-                                    child: const Text(
-                                      "Delete",
-                                      style: TextStyle(color: Colors.red),
+                                    icon:const Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                          Icon(
+                                      CupertinoIcons.delete,
+                                      color: Colors.red,
+                                    ),
+                                     SizedBox(width: 2),
+                                         Text(
+                                          "Delete",
+                                          style: TextStyle(color: Colors.red),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
